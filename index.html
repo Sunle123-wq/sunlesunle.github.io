@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>滇池长效治理 · 护滇数据全景</title>
+    <!-- Swiper CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js">
+    </script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js">
+    </script>
+    <style>
+        /* ===== 全局重置 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #eaf5f0;
+            color: #1e3f36;
+            overflow: hidden;
+            height: 100vh;
+        }
+        .swiper-container {
+            width: 100%;
+            height: 100vh;
+            background: #eaf5f0;
+        }
+        .swiper-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 18px 16px 28px;
+            overflow-y: auto;
+            background: #eaf5f0;
+            position: relative;
+        }
+        .swiper-slide::-webkit-scrollbar {
+            width: 3px;
+        }
+        .swiper-slide::-webkit-scrollbar-thumb {
+            background: #2e9b6e;
+            border-radius: 10px;
+        }
+
+        /* 分页指示器 */
+        .swiper-pagination-bullet {
+            background: #2e9b6e;
+            opacity: 0.4;
+        }
+        .swiper-pagination-bullet-active {
+            opacity: 1;
+            background: #0d5c44;
+        }
+
+        /* ===== 通用组件 ===== */
+        .page-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #0d5c44;
+            margin-bottom: 6px;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        .page-sub {
+            font-size: 13px;
+            color: #4d7a6b;
+            text-align: center;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .green-bar {
+            width: 50px;
+            height: 3px;
+            background: #2e9b6e;
+            border-radius: 4px;
+            margin: 0 auto 12px;
+        }
+        .swipe-hint {
+            font-size: 11px;
+            color: #8aaa9b;
+            opacity: 0.6;
+            letter-spacing: 1.5px;
+            animation: pulse 2s infinite;
+            margin-top: 6px;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        /* ===== 第一页：封面 ===== */
+        .slide-1 {
+            background: linear-gradient(145deg, #0d5c44 0%, #1a8a6a 100%);
+            color: #fff;
+            justify-content: center;
+            text-align: center;
+        }
+        .slide-1 .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(4px);
+            padding: 4px 18px;
+            border-radius: 40px;
+            font-size: 12px;
+            letter-spacing: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 16px;
+        }
+        .slide-1 h1 {
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        .slide-1 .sub {
+            font-size: 15px;
+            opacity: 0.92;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 12px;
+            display: inline-block;
+        }
+        .slide-1 .sub span {
+            background: rgba(255, 255, 255, 0.10);
+            padding: 2px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+        .map-deco {
+            position: absolute;
+            bottom: 24px;
+            right: 16px;
+            width: 100px;
+            height: 100px;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+        .map-deco svg {
+            width: 100%;
+            height: 100%;
+            fill: #fff;
+        }
+
+        /* ===== 第二页：核心数据 ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+            margin: 4px auto;
+        }
+        .stat-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 14px 6px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0, 40, 30, 0.06);
+            border: 1px solid #d4ede4;
+        }
+        .stat-card .num {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0d5c44;
+        }
+        .stat-card .num small {
+            font-size: 15px;
+            font-weight: 400;
+            color: #4d7a6b;
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: #4d6b62;
+            margin-top: 2px;
+        }
+        .stat-card .tag {
+            font-size: 10px;
+            color: #7a9a8b;
+            background: #eaf3ef;
+            padding: 0 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+        .extra-badge {
+            background: #f0f7f3;
+            border-radius: 12px;
+            padding: 8px 14px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #1e3f36;
+            text-align: center;
+            border-left: 3px solid #1a8a6a;
+            width: 100%;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+        .extra-badge strong {
+            color: #0d5c44;
+        }
+
+        /* ===== 第三、四页：图表 ===== */
+        .chart-wrapper {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 14px 10px 10px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 2px 16px rgba(0, 40, 30, 0.06);
+            border: 1px solid #d4ede4;
+            margin-top: 2px;
+        }
+        .chart-wrapper .chart-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e3f36;
+            text-align: center;
+        }
+        .chart-wrapper .chart-sub {
+            font-size: 11px;
+            color: #6f8f80;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        .chart-box {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+        .chart-insight {
+            background: #f0f7f3;
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #1e3f36;
+            border-left: 3px solid #1a8a6a;
+            line-height: 1.5;
+        }
+        .chart-insight strong {
+            color: #0d5c44;
+        }
+        .phase-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .phase-tags span {
+            background: #eaf3ef;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            color: #2a5a4a;
+        }
+
+        /* ===== 第五页：抖音核心 ===== */
+        .doutube-hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            max-width: 400px;
+            margin: 4px auto;
+        }
+        .doutube-hero .item {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 12px 4px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 40, 30, 0.05);
+            border: 1px solid #d4ede4;
+        }
+        .doutube-hero .item .big {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0d5c44;
+        }
+        .doutube-hero .item .big small {
+            font-size: 13px;
+            font-weight: 400;
+            color: #4d7a6b;
+        }
+        .doutube-hero .item .lbl {
+            font-size: 11px;
+            color: #4d6b62;
+            margin-top: 2px;
+        }
+        .account-struct {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            width: 100%;
+            max-width: 400px;
+            margin: 6px auto;
+        }
+        .account-struct .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 8px 4px;
+            text-align: center;
+            border: 1px solid #d4ede4;
+            box-shadow: 0 1px 6px rgba(0, 40, 30, 0.04);
+        }
+        .account-struct .card .n {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0d5c44;
+        }
+        .account-struct .card .l {
+            font-size: 10px;
+            color: #4d6b62;
+        }
+        .hot-tag {
+            background: #f0f7f3;
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 12px;
+            color: #1e3f36;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            margin-top: 4px;
+            border-left: 3px solid #d68a3c;
+        }
+        .hot-tag strong {
+            color: #b86a1f;
+        }
+
+        /* ===== 第六页：衍生话题 ===== */
+        .topic-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            max-width: 400px;
+            margin: 4px auto;
+        }
+        .topic-grid .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 10px 6px;
+            text-align: center;
+            border: 1px solid #d4ede4;
+            box-shadow: 0 1px 8px rgba(0, 40, 30, 0.04);
+        }
+        .topic-grid .card .hashtag {
+            font-size: 12px;
+            font-weight: 600;
+            color: #0d5c44;
+        }
+        .topic-grid .card .play {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a8a6a;
+        }
+        .topic-grid .card .play small {
+            font-size: 12px;
+            font-weight: 400;
+            color: #4d7a6b;
+        }
+        .topic-grid .card .desc {
+            font-size: 10px;
+            color: #4d6b62;
+            margin-top: 2px;
+        }
+        .total-banner {
+            background: linear-gradient(135deg, #0d5c44, #1a8a6a);
+            color: #fff;
+            border-radius: 14px;
+            padding: 10px 12px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            margin: 6px auto 0;
+        }
+        .total-banner .big {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .total-banner .sub {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+        .content-pie {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px 14px;
+            margin-top: 6px;
+        }
+        .content-pie .item {
+            font-size: 12px;
+            color: #1e3f36;
+            background: #f0f7f3;
+            padding: 2px 12px;
+            border-radius: 20px;
+        }
+        .content-pie .item .pct {
+            font-weight: 700;
+            color: #0d5c44;
+        }
+
+        /* ===== 第七页：用户画像 + 转化 + 成员 ===== */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            max-width: 400px;
+            margin: 4px auto;
+        }
+        .profile-grid .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 10px 6px;
+            text-align: center;
+            border: 1px solid #d4ede4;
+        }
+        .profile-grid .card .v {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0d5c44;
+        }
+        .profile-grid .card .v small {
+            font-size: 13px;
+            font-weight: 400;
+            color: #4d7a6b;
+        }
+        .profile-grid .card .l {
+            font-size: 11px;
+            color: #4d6b62;
+        }
+        .convert-list {
+            width: 100%;
+            max-width: 400px;
+            margin: 4px auto;
+        }
+        .convert-list .row {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 6px 12px;
+            margin-bottom: 4px;
+            border: 1px solid #d4ede4;
+            font-size: 12px;
+            color: #1e3f36;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .convert-list .row .val {
+            font-weight: 700;
+            color: #0d5c44;
+        }
+        .member-section {
+            margin-top: 8px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 12px 16px;
+            border: 1px solid #d4ede4;
+            box-shadow: 0 2px 12px rgba(0, 40, 30, 0.05);
+        }
+        .member-section .title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0d5c44;
+            margin-bottom: 4px;
+        }
+        .member-section .names {
+            font-size: 14px;
+            color: #1e3f36;
+            letter-spacing: 1px;
+        }
+        .member-section .names span {
+            display: inline-block;
+            background: #eaf3ef;
+            padding: 2px 12px;
+            border-radius: 20px;
+            margin: 2px 4px;
+            font-size: 13px;
+        }
+
+        /* ===== 模态框 ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-box {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 24px 20px 18px;
+            max-width: 320px;
+            width: 80%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            animation: modalPop 0.3s ease;
+        }
+        @keyframes modalPop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .modal-box h3 {
+            font-size: 18px;
+            color: #0d5c44;
+            margin-bottom: 6px;
+        }
+        .modal-box p {
+            font-size: 13px;
+            color: #2a403a;
+            margin-bottom: 14px;
+            line-height: 1.6;
+        }
+        .modal-box .btn-close {
+            background: #1a8a6a;
+            color: #fff;
+            border: none;
+            padding: 6px 28px;
+            border-radius: 40px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 400px) {
+            .slide-1 h1 {
+                font-size: 24px;
+            }
+            .stat-card .num {
+                font-size: 22px;
+            }
+            .doutube-hero .item .big {
+                font-size: 18px;
+            }
+            .chart-box {
+                height: 170px;
+            }
+            .topic-grid .card .play {
+                font-size: 15px;
+            }
+            .member-section .names span {
+                font-size: 12px;
+                padding: 1px 10px;
+            }
+        }
+        @media (min-width: 600px) {
+            .chart-box {
+                height: 240px;
+            }
+            .stats-grid {
+                max-width: 480px;
+                gap: 14px;
+            }
+            .stat-card .num {
+                font-size: 32px;
+            }
+            .doutube-hero .item .big {
+                font-size: 28px;
+            }
+            .topic-grid .card .play {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== Swiper容器 ===== -->
+    <div class="swiper-container">
+        <div class="swiper-wrapper">
+
+            <!-- ========== 第一页：封面 ========== -->
+            <div class="swiper-slide slide-1">
+                <div class="hero-badge">🌊 滇池 · 长效治理</div>
+                <h1>滇池长效治理<br>绿色种子深入人心</h1>
+                <div class="sub"><span>从百支市民河长到万千志愿力量</span></div>
+                <div class="map-deco">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M70,40 Q100,20 130,40 Q160,60 170,100 Q180,140 150,170 Q120,190 90,180 Q60,170 40,140 Q20,110 30,70 Q40,40 70,40 Z" />
+                        <circle cx="100" cy="100" r="10" fill="none" stroke="#fff" stroke-width="2" />
+                        <circle cx="80" cy="80" r="4" fill="#fff" opacity="0.5" />
+                        <circle cx="120" cy="120" r="4" fill="#fff" opacity="0.5" />
+                        <circle cx="70" cy="130" r="3" fill="#fff" opacity="0.5" />
+                        <circle cx="140" cy="70" r="3" fill="#fff" opacity="0.5" />
+                    </svg>
+                </div>
+                <div class="swipe-hint" style="color:rgba(255,255,255,0.5);">👆 向上滑动</div>
+            </div>
+
+            <!-- ========== 第二页：核心数据 ========== -->
+            <div class="swiper-slide">
+                <div class="page-title">📊 志愿力量 · 核心数据</div>
+                <div class="green-bar"></div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="num"><span class="num-count" data-target="100">0</span> <small>支</small></div>
+                        <div class="label">市民河长团队</div>
+                        <div class="tag">2019起固定</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="num"><span class="num-count" data-target="550">0</span> <small>支</small></div>
+                        <div class="label">爱湖服务队</div>
+                        <div class="tag">全域覆盖</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="num"><span class="num-count" data-target="8">0</span> <small>万+</small></div>
+                        <div class="label">在册核心志愿者</div>
+                        <div class="tag">滇池卫士+驴友</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="num"><span class="num-count" data-target="11">0</span> <small>万</small></div>
+                        <div class="label">全域志愿大盘</div>
+                        <div class="tag">600支团队</div>
+                    </div>
+                </div>
+                <div class="extra-badge">
+                    🌱 <strong>青少年分支</strong>：联动11所中小学组建「小小河长」家庭护滇队伍，呈贡区专项活动60+场，累计1200+人次巡河
+                </div>
+                <div class="swipe-hint" style="position:relative; margin-top:4px;">👆 继续滑动</div>
+            </div>
+
+            <!-- ========== 第三页：活动场次 & 参与人次 ========== -->
+            <div class="swiper-slide">
+                <div class="page-title">📈 活动场次 &amp; 参与人次</div>
+                <div class="green-bar"></div>
+                <div class="chart-wrapper">
+                    <div class="chart-title">四个发展阶段对比</div>
+                    <div class="chart-sub">从初创零散到高质量创新</div>
+                    <div class="chart-box">
+                        <canvas id="chart1"></canvas>
+                    </div>
+                    <div class="phase-tags">
+                        <span>初创 2009-2018</span>
+                        <span>爆发 2019-2021</span>
+                        <span>扩容 2022-2024</span>
+                        <span>创新 2025-2026</span>
+                    </div>
+                    <div class="chart-insight">
+                        💡 <strong>2019年关键拐点</strong>：百支标准化团队落地，场次从不足50场跃升至500场，参与人次从300+增至1067人。
+                    </div>
+                </div>
+                <div class="swipe-hint" style="position:relative; margin-top:2px;">👆 点击柱子查看详情</div>
+            </div>
+
+            <!-- ========== 第四页：垃圾清理 & 志愿时长 ========== -->
+            <div class="swiper-slide">
+                <div class="page-title">⏳ 清理产出 &amp; 志愿时长</div>
+                <div class="green-bar"></div>
+                <div class="chart-wrapper">
+                    <div class="chart-title">治理成效与人力投入同步增长</div>
+                    <div class="chart-sub">垃圾清理量在扩容期达峰值</div>
+                    <div class="chart-box">
+                        <canvas id="chart2"></canvas>
+                    </div>
+                    <div class="phase-tags">
+                        <span>初创 2009-2018</span>
+                        <span>爆发 2019-2021</span>
+                        <span>扩容 2022-2024</span>
+                        <span>创新 2025-2026</span>
+                    </div>
+                    <div class="chart-insight">
+                        💡 <strong>治理升级</strong>：2022–2024年垃圾清理量达峰值 <strong>71.33吨</strong>；2025年后向水质监测、生态调研等多元转型。
+                    </div>
+                </div>
+                <div class="swipe-hint" style="position:relative; margin-top:2px;">👆 点击柱子查看详情</div>
+            </div>
+
+            <!-- ========== 第五页：抖音#护滇 核心数据 ========== -->
+            <div class="swiper-slide">
+                <div class="page-title">📱 #护滇 · 抖音数据全景</div>
+                <div class="green-bar"></div>
+                <div class="doutube-hero">
+                    <div class="item">
+                        <div class="big">1.28 <small>亿</small></div>
+                        <div class="lbl">总播放量</div>
+                    </div>
+                    <div class="item">
+                        <div class="big">4.76 <small>万</small></div>
+                        <div class="lbl">投稿视频</div>
+                    </div>
+                    <div class="item">
+                        <div class="big">1426 <small>万</small></div>
+                        <div class="lbl">累计互动</div>
+                    </div>
+                </div>
+                <div class="account-struct">
+                    <div class="card">
+                        <div class="n">327</div>
+                        <div class="l">政务/公益号</div>
+                    </div>
+                    <div class="card">
+                        <div class="n">1.2 <small>万+</small></div>
+                        <div class="l">本地达人</div>
+                    </div>
+                    <div class="card">
+                        <div class="n">3.5 <small>万+</small></div>
+                        <div class="l">市民UGC</div>
+                    </div>
+                </div>
+                <div class="hot-tag">
+                    🔥 <strong>热度高峰</strong>：4月地球日 · 99公益日 · 冬季观鸥季 &nbsp;|&nbsp; 峰值单日 <strong>1860万</strong> 播放
+                </div>
+                <div style="margin-top:4px; font-size:12px; color:#4d7a6b; text-align:center; max-width:400px;">
+                    数据来源：昆明市滇池管理局融媒体监测 · 抖音同城后台
+                </div>
+                <div class="swipe-hint" style="position:relative; margin-top:2px;">👆 继续滑动</div>
+            </div>
+
+            <!-- ========== 第六页：衍生话题 + 内容结构 ========== -->
+            <div class="swiper-slide">
+                <div class="page-title">🔗 衍生话题 &amp; 内容结构</div>
+                <div class="green-bar"></div>
+                <div class="topic-grid">
+                    <div class="card">
+                        <div class="hashtag">#护滇小卫士</div>
+                        <div class="play">4630 <small>万</small></div>
+                        <div class="desc">1.82万条 · 青少年科普</div>
+                    </div>
+                    <div class="card">
+                        <div class="hashtag">#护滇计划</div>
+                        <div class="play">3120 <small>万</small></div>
+                        <div class="desc">公益募捐 · 金线鲃放归</div>
+                    </div>
+                    <div class="card">
+                        <div class="hashtag">#保护滇池</div>
+                        <div class="play">17.6 <small>亿</small></div>
+                        <div class="desc">核心大话题 · 最大流量池</div>
+                    </div>
+                    <div class="card">
+                        <div class="hashtag">#滇池绿道护滇</div>
+                        <div class="play">2.14 <small>亿</small></div>
+                        <div class="desc">骑行巡湖 · 湿地实拍</div>
+                    </div>
+                </div>
+                <div class="total-banner">
+                    <div class="big">21.7 亿+</div>
+                    <div class="sub">全系列护滇相关话题总播放量</div>
+                </div>
+                <div style="margin-top:6px; width:100%; max-width:400px; background:#fff; border-radius:12px; padding:8px 12px; border:1px solid #d4ede4;">
+                    <div style="font-size:12px; font-weight:600; color:#0d5c44; text-align:center; margin-bottom:4px;">📌 内容结构占比</div>
+                    <div class="content-pie">
+                        <span class="item"><span class="pct">41%</span> 线下志愿活动</span>
+                        <span class="item"><span class="pct">33%</span> 生态实拍</span>
+                        <span class="item"><span class="pct">16%</span> 公益科普</span>
+                        <span class="item"><span class="pct">10%</span> 亲子记录</span>
+                    </div>
+                </div>
+                <div class="swipe-hint" style="position:relative; margin-top:2px;">👆 继续滑动</div>
+            </div>
+
+            <!-- ========== 第七页：用户画像 + 转化 + 小组成员 ========== -->
+            <div class="swiper-slide">
+                <div class="page-title">👥 用户画像 &amp; 转化成效</div>
+                <div class="green-bar"></div>
+                <div class="profile-grid">
+                    <div class="card">
+                        <div class="v">68% <small>昆明</small></div>
+                        <div class="l">本地用户</div>
+                    </div>
+                    <div class="card">
+                        <div class="v">21% <small>云南其他</small></div>
+                        <div class="l">省内用户</div>
+                    </div>
+                    <div class="card">
+                        <div class="v">11% <small>省外</small></div>
+                        <div class="l">游客用户</div>
+                    </div>
+                    <div class="card">
+                        <div class="v">47% <small>18-35岁</small></div>
+                        <div class="l">青年主力</div>
+                    </div>
+                </div>
+                <div class="convert-list">
+                    <div class="row"><span>🏆 百万播放爆款</span><span class="val">62 条</span></div>
+                    <div class="row"><span>📹 线下→线上短视频</span><span class="val">1.2 万条</span></div>
+                    <div class="row"><span>📈 带动新增播放</span><span class="val">3800 万+</span></div>
+                    <div class="row"><span>🎯 99公益日曝光</span><span class="val">7000 万+</span></div>
+                    <div class="row"><span>🚴 绿道打卡参与增长</span><span class="val">↑ 63%</span></div>
+                    <div class="row"><span>📊 年均流量增速</span><span class="val">≈ 60%</span></div>
+                </div>
+
+                <!-- 小组成员 -->
+                <div class="member-section">
+                    <div class="title">🌿 小组成员</div>
+                    <div class="names">
+                        <span>孙乐</span>
+                        <span>张翰霖</span>
+                        <span>权永明</span>
+                        <span>郭上荣</span>
+                        <span>吴成琦</span>
+                    </div>
+                </div>
+                <div style="font-size:10px; color:#8aaa9b; margin-top:6px; text-align:center;">
+                    数据截至2026年6月 · 滇池长效治理 &amp; #护滇 抖音数据全景
+                </div>
+                <div class="swipe-hint" style="position:relative; margin-top:2px;">👆 已至末尾</div>
+            </div>
+
+        </div><!-- /swiper-wrapper -->
+        <!-- 分页指示器 -->
+        <div class="swiper-pagination"></div>
+    </div><!-- /swiper-container -->
+
+    <!-- ===== 模态框 ===== -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-box">
+            <h3 id="modalTitle">详情</h3>
+            <p id="modalDesc">描述内容</p>
+            <button class="btn-close" id="modalClose">知道了</button>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- 脚本 -->
+    <!-- ============================== -->
+    <script>
+        // 注册 datalabels 插件
+        Chart.register(ChartDataLabels);
+
+        // ---------- 初始化 Swiper ----------
+        const swiper = new Swiper('.swiper-container', {
+            direction: 'vertical',
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            mousewheel: true,
+            keyboard: true,
+            effect: 'slide',
+            speed: 600,
+        });
+
+        // ---------- 数据 ----------
+        const labels = ['初创\n2009–2018', '爆发\n2019–2021', '扩容\n2022–2024', '创新\n2025–2026'];
+        const activityData = [40, 500, 600, 665];
+        const participantData = [765, 1067, 2600, 3450];
+        const garbageData = [4.25, 42, 71.33, 51];
+        const hoursData = [140, 1750, 2100, 2135];
+
+        // ---------- 图表1：活动场次 + 参与人次 ----------
+        const ctx1 = document.getElementById('chart1').getContext('2d');
+        const chart1 = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '活动场次',
+                    data: activityData,
+                    backgroundColor: 'rgba(61, 143, 191, 0.78)',
+                    borderColor: '#3d8fbf',
+                    borderWidth: 2,
+                    borderRadius: 4,
+                    barPercentage: 0.35,
+                    order: 1,
+                }, {
+                    label: '参与人次',
+                    data: participantData,
+                    backgroundColor: 'rgba(46, 155, 110, 0.78)',
+                    borderColor: '#2e9b6e',
+                    borderWidth: 2,
+                    borderRadius: 4,
+                    barPercentage: 0.35,
+                    order: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 1000, easing: 'easeOutQuart' },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { usePointStyle: true, pointStyle: 'circle', padding: 10, font: { size: 10 },
+                            color: '#1e3f36' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let val = context.parsed.y;
+                                return context.dataset.label + ': ' + val + (context.dataset.label === '参与人次' ?
+                                    ' 人' : ' 场');
+                            }
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'end',
+                        color: '#1e3f36',
+                        font: { size: 9, weight: '600' },
+                        offset: 0,
+                        formatter: function(v) { return v; }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 9 } } },
+                    x: { grid: { display: false }, ticks: { font: { size: 8 } } }
+                },
+                onClick: function(event, elements) {
+                    if (elements.length > 0) {
+                        const idx = elements[0].index;
+                        const dsIdx = elements[0].datasetIndex;
+                        const label = this.data.labels[idx];
+                        const val = this.data.datasets[dsIdx].data[idx];
+                        const dsLabel = this.data.datasets[dsIdx].label;
+                        const phaseNames = ['初创零散期', '标准化爆发期', '扩容增长期', '高质量创新期'];
+                        const extras = {
+                            '活动场次': ['全年仅32~48场', '百支团队落地，跃升至500场', '亲子志愿加入，增至600场',
+                                '多元活动，达665场（预估）'
+                            ],
+                            '参与人次': ['最高仅1200人', '增至1067人，翻倍增长', '突破2600人，为2019年2.4倍',
+                                '达3450人（预估），再创新高'
+                            ]
+                        };
+                        const phase = phaseNames[idx] || '';
+                        const extra = (extras[dsLabel] && extras[dsLabel][idx]) || '';
+                        showModal(
+                            dsLabel + ' · ' + phase,
+                            '数值：' + val + (dsLabel === '参与人次' ? ' 人' : ' 场') + '<br>' + extra
+                        );
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+
+        // ---------- 图表2：垃圾清理 + 志愿时长 ----------
+        const ctx2 = document.getElementById('chart2').getContext('2d');
+        const chart2 = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '垃圾清理 (吨)',
+                    data: garbageData,
+                    backgroundColor: 'rgba(214, 138, 60, 0.78)',
+                    borderColor: '#d68a3c',
+                    borderWidth: 2,
+                    borderRadius: 4,
+                    barPercentage: 0.35,
+                    order: 1,
+                }, {
+                    label: '志愿时长 (小时)',
+                    data: hoursData,
+                    backgroundColor: 'rgba(139, 111, 158, 0.78)',
+                    borderColor: '#8b6f9e',
+                    borderWidth: 2,
+                    borderRadius: 4,
+                    barPercentage: 0.35,
+                    order: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 1000, easing: 'easeOutQuart' },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { usePointStyle: true, pointStyle: 'circle', padding: 10, font: { size: 10 },
+                            color: '#1e3f36' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let val = context.parsed.y;
+                                return context.dataset.label + ': ' + val + (context.dataset.label.includes('垃圾') ?
+                                    ' 吨' : ' 小时');
+                            }
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'end',
+                        color: '#1e3f36',
+                        font: { size: 9, weight: '600' },
+                        offset: 0,
+                        formatter: function(v) { return v; }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 9 } } },
+                    x: { grid: { display: false }, ticks: { font: { size: 8 } } }
+                },
+                onClick: function(event, elements) {
+                    if (elements.length > 0) {
+                        const idx = elements[0].index;
+                        const dsIdx = elements[0].datasetIndex;
+                        const label = this.data.labels[idx];
+                        const val = this.data.datasets[dsIdx].data[idx];
+                        const dsLabel = this.data.datasets[dsIdx].label;
+                        const phaseNames = ['初创零散期', '标准化爆发期', '扩容增长期', '高质量创新期'];
+                        const extras = {
+                            '垃圾清理 (吨)': ['年清理仅3.5~5吨', '暴涨至42吨，大规模净滩', '峰值71.33吨，人工清理拉满',
+                                '回落至51吨，重心转型'
+                            ],
+                            '志愿时长 (小时)': ['仅112~168小时', '跃至1750小时，增长14倍', '稳定2100小时/年，持续加码',
+                                '峰值2135小时，再创新高'
+                            ]
+                        };
+                        const phase = phaseNames[idx] || '';
+                        const extra = (extras[dsLabel] && extras[dsLabel][idx]) || '';
+                        showModal(
+                            dsLabel + ' · ' + phase,
+                            '数值：' + val + (dsLabel === '垃圾清理 (吨)' ? ' 吨' : ' 小时') + '<br>' + extra
+                        );
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+
+        // ---------- 模态框 ----------
+        function showModal(title, desc) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalDesc').innerHTML = desc;
+            document.getElementById('modal').classList.add('active');
+        }
+        document.getElementById('modalClose').addEventListener('click', function() {
+            document.getElementById('modal').classList.remove('active');
+        });
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
+        });
+
+        // ---------- 数字滚动 ----------
+        function animateNumbers() {
+            const counters = document.querySelectorAll('.num-count');
+            counters.forEach(counter => {
+                const target = parseFloat(counter.getAttribute('data-target'));
+                if (isNaN(target)) return;
+                const isFloat = target % 1 !== 0;
+                const duration = 1600;
+                const startTime = performance.now();
+
+                function update(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = 1 - (1 - progress) * (1 - progress);
+                    let currentVal = eased * target;
+                    if (!isFloat) currentVal = Math.floor(currentVal);
+                    else currentVal = parseFloat(currentVal.toFixed(1));
+                    counter.textContent = currentVal;
+                    if (progress < 1) requestAnimationFrame(update);
+                    else counter.textContent = target;
+                }
+                requestAnimationFrame(update);
+            });
+        }
+
+        // ---------- 加载完成 ----------
+        window.addEventListener('load', function() {
+            setTimeout(animateNumbers, 500);
+        });
+
+        console.log('🌊 滇池长效治理 · 护滇数据全景 H5 已加载 (7页，含抖音#护滇完整数据)');
+        console.log('👥 小组成员：孙乐、张翰霖、权永明、郭上荣、吴成琦');
+    </script>
+
+</body>
+</html>
